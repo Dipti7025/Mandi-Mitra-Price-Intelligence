@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Mandi Mitra"
+description = "A mobile-first mandi price intelligence app for Indian farmers and traders. Check market prices, compare nearby mandis, review clearly labeled forecasts and selling guidance, and set price alerts."
+version = "1.0.0"
+id = "artifacts/mandi-mitra"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 25834
+
+[services.development]
+run = "pnpm --filter @workspace/mandi-mitra run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/mandi-mitra", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/mandi-mitra/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "25834"
+BASE_PATH = "/"

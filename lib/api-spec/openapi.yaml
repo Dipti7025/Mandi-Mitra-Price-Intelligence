@@ -3,20 +3,23 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Mandi Mitra market intelligence API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
-    description: Health operations
+  - name: market
+  - name: alerts
+  - name: profile
+  - name: auth
+  - name: admin
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,13 +27,797 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /market-data/commodities:
+    get:
+      operationId: getCommodities
+      tags: [market]
+      summary: List enabled commodities
+      responses:
+        "200":
+          description: Available commodities
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Commodity"
+  /market-data/states:
+    get:
+      operationId: getStates
+      tags: [market]
+      summary: List states with markets for a commodity
+      parameters:
+        - name: commodityId
+          in: query
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Available states
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/State" }
+  /market-data/mandis:
+    get:
+      operationId: getMandis
+      tags: [market]
+      summary: List mandis for a commodity and state
+      parameters:
+        - name: commodityId
+          in: query
+          required: true
+          schema: { type: string }
+        - name: stateId
+          in: query
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Matching mandis
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Mandi" }
+  /market-data/varieties:
+    get:
+      operationId: getVarieties
+      tags: [market]
+      summary: List varieties available at a selected market
+      parameters:
+        - name: commodityId
+          in: query
+          required: true
+          schema: { type: string }
+        - name: mandiId
+          in: query
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Market-specific varieties
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Variety" }
+  /market-data/today:
+    get:
+      operationId: getMarketToday
+      tags: [market]
+      summary: Get today's market price and arrivals
+      parameters:
+        - name: commodityId
+          in: query
+          required: true
+          schema: { type: string }
+        - name: mandiId
+          in: query
+          required: true
+          schema: { type: string }
+        - name: varietyId
+          in: query
+          required: false
+          schema: { type: string }
+      responses:
+        "200":
+          description: Latest market record
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MarketToday" }
+        "404":
+          description: No market data for this selection
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+  /market-data/forecast:
+    get:
+      operationId: getMarketForecast
+      tags: [market]
+      summary: Get actual and seven-day forecast prices
+      parameters:
+        - name: commodityId
+          in: query
+          required: true
+          schema: { type: string }
+        - name: mandiId
+          in: query
+          required: true
+          schema: { type: string }
+        - name: varietyId
+          in: query
+          required: false
+          schema: { type: string }
+      responses:
+        "200":
+          description: Forecast result with provenance
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Forecast" }
+        "404":
+          description: Forecast is unavailable
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+  /market-data/compare:
+    get:
+      operationId: compareMandis
+      tags: [market]
+      summary: Compare estimated returns at nearby mandis
+      parameters:
+        - name: commodityId
+          in: query
+          required: true
+          schema: { type: string }
+        - name: stateId
+          in: query
+          required: true
+          schema: { type: string }
+        - name: mandiId
+          in: query
+          required: true
+          schema: { type: string }
+        - name: quantityQtl
+          in: query
+          required: true
+          schema: { type: number, minimum: 1, maximum: 100000 }
+      responses:
+        "200":
+          description: Nearby mandi ranking
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/MandiComparison" }
+  /alerts:
+    get:
+      operationId: getAlerts
+      tags: [alerts]
+      summary: List alerts for the current user
+      responses:
+        "200":
+          description: Saved alerts
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/PriceAlert" }
+        "401":
+          description: Sign in required
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+    post:
+      operationId: createAlert
+      tags: [alerts]
+      summary: Create a price alert
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PriceAlertInput" }
+      responses:
+        "201":
+          description: Created alert
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PriceAlert" }
+        "401":
+          description: Sign in required
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+  /alerts/{alertId}:
+    patch:
+      operationId: updateAlert
+      tags: [alerts]
+      summary: Update alert settings
+      parameters:
+        - name: alertId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PriceAlertUpdate" }
+      responses:
+        "200":
+          description: Updated alert
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PriceAlert" }
+    delete:
+      operationId: deleteAlert
+      tags: [alerts]
+      summary: Delete a saved alert
+      parameters:
+        - name: alertId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "204": { description: Deleted }
+  /profile:
+    get:
+      operationId: getProfile
+      tags: [profile]
+      summary: Get the signed-in user's profile
+      responses:
+        "200":
+          description: User profile
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Profile" }
+        "401":
+          description: Sign in required
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+    patch:
+      operationId: updateProfile
+      tags: [profile]
+      summary: Save profile and preferred market
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ProfileUpdate" }
+      responses:
+        "200":
+          description: Updated profile
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Profile" }
+  /auth/otp/request:
+    post:
+      operationId: requestPhoneOtp
+      tags: [auth]
+      summary: Request a phone sign-in code
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/OtpRequest" }
+      responses:
+        "200":
+          description: Code sent or development-mode code issued
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/OtpRequestResult" }
+        "503":
+          description: OTP provider is not configured
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+  /auth/otp/verify:
+    post:
+      operationId: verifyPhoneOtp
+      tags: [auth]
+      summary: Verify a phone sign-in code
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/OtpVerify" }
+      responses:
+        "200":
+          description: Verified account
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Profile" }
+        "401":
+          description: Code invalid or expired
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+  /auth/logout:
+    post:
+      operationId: logout
+      tags: [auth]
+      summary: End the current session
+      responses:
+        "204": { description: Session ended }
+  /admin/overview:
+    get:
+      operationId: getAdminOverview
+      tags: [admin]
+      summary: Get protected dataset and user overview
+      responses:
+        "200":
+          description: Admin overview
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminOverview" }
+        "401":
+          description: Admin access required
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+  /admin/catalog:
+    get:
+      operationId: getAdminCatalog
+      tags: [admin]
+      summary: List commodities, states, mandis, and varieties
+      responses:
+        "200":
+          description: Catalog entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/AdminCatalogEntry" }
+    post:
+      operationId: createAdminCatalogEntry
+      tags: [admin]
+      summary: Add a commodity, state, mandi, or variety
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AdminCatalogInput" }
+      responses:
+        "201":
+          description: Catalog entry created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminCatalogEntry" }
+  /admin/catalog/{entityType}/{entityId}:
+    patch:
+      operationId: updateAdminCatalogEntry
+      tags: [admin]
+      summary: Rename or enable/disable a catalog entry
+      parameters:
+        - name: entityType
+          in: path
+          required: true
+          schema: { type: string, enum: [commodity, state, mandi, variety] }
+        - name: entityId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AdminCatalogUpdate" }
+      responses:
+        "200":
+          description: Catalog entry updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminCatalogEntry" }
+  /admin/users:
+    get:
+      operationId: getAdminUsers
+      tags: [admin]
+      summary: List registered users
+      responses:
+        "200":
+          description: Registered users
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/AdminUser" }
+  /admin/market-records:
+    get:
+      operationId: getAdminMarketRecords
+      tags: [admin]
+      summary: Search market records
+      parameters:
+        - name: search
+          in: query
+          required: false
+          schema: { type: string }
+      responses:
+        "200":
+          description: Market records
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/AdminMarketRecord" }
+        "401":
+          description: Admin access required
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+    post:
+      operationId: createAdminMarketRecord
+      tags: [admin]
+      summary: Add a market price record
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AdminMarketRecordInput" }
+      responses:
+        "201":
+          description: Added record
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminMarketRecord" }
+        "401":
+          description: Admin access required
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+  /admin/market-records/{recordId}:
+    patch:
+      operationId: updateAdminMarketRecord
+      tags: [admin]
+      summary: Edit a market price record
+      parameters:
+        - name: recordId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AdminMarketRecordUpdate" }
+      responses:
+        "200":
+          description: Updated record
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminMarketRecord" }
+    delete:
+      operationId: deleteAdminMarketRecord
+      tags: [admin]
+      summary: Delete a market price record
+      parameters:
+        - name: recordId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "204": { description: Deleted }
+  /admin/market-records/import:
+    post:
+      operationId: importAdminMarketRecords
+      tags: [admin]
+      summary: Import validated CSV market data
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/MarketImport" }
+      responses:
+        "200":
+          description: Import summary
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ImportResult" }
+        "401":
+          description: Admin access required
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+  /admin/data-health:
+    get:
+      operationId: getDataHealth
+      tags: [admin]
+      summary: Get data freshness and forecast-provider status
+      responses:
+        "200":
+          description: Data health report
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DataHealth" }
+        "401":
+          description: Admin access required
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
 components:
   schemas:
     HealthStatus:
       type: object
       properties:
-        status:
-          type: string
-      required:
-        - status
+        status: { type: string }
+      required: [status]
+    Error:
+      type: object
+      properties:
+        error: { type: string }
+      required: [error]
+    Commodity:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string }
+        enabled: { type: boolean }
+      required: [id, name, enabled]
+    State:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string }
+        code: { type: string }
+      required: [id, name, code]
+    Mandi:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string }
+        stateId: { type: string }
+        stateName: { type: string }
+        distanceKm: { type: number }
+      required: [id, name, stateId, stateName, distanceKm]
+    Variety:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string }
+        commodityId: { type: string }
+        mandiId: { type: string }
+      required: [id, name, commodityId, mandiId]
+    MarketToday:
+      type: object
+      properties:
+        commodityId: { type: string }
+        commodityName: { type: string }
+        mandiId: { type: string }
+        mandiName: { type: string }
+        stateName: { type: string }
+        varietyId: { type: ["string", "null"] }
+        varietyName: { type: ["string", "null"] }
+        date: { type: string, format: date }
+        minimumPrice: { type: number }
+        maximumPrice: { type: number }
+        modalPrice: { type: number }
+        arrivals: { type: number }
+        arrivalUnit: { type: string }
+        unit: { type: string }
+        changePercent: { type: number }
+        source: { type: string }
+        lastUpdated: { type: string, format: date-time }
+        isDemo: { type: boolean }
+      required: [commodityId, commodityName, mandiId, mandiName, stateName, date, minimumPrice, maximumPrice, modalPrice, arrivals, arrivalUnit, unit, changePercent, source, lastUpdated, isDemo]
+    ForecastPoint:
+      type: object
+      properties:
+        date: { type: string, format: date }
+        label: { type: string }
+        price: { type: number }
+        kind: { type: string, enum: [actual, forecast] }
+      required: [date, label, price, kind]
+    Forecast:
+      type: object
+      properties:
+        commodityName: { type: string }
+        mandiName: { type: string }
+        unit: { type: string }
+        points:
+          type: array
+          items: { $ref: "#/components/schemas/ForecastPoint" }
+        currentPrice: { type: number }
+        expectedPrice: { type: number }
+        expectedChangePercent: { type: number }
+        recommendation: { type: string, enum: [HOLD, RELEASE, WAIT] }
+        reason: { type: string }
+        confidence: { type: ["string", "null"], enum: [High, Medium, Low, null] }
+        modelStatus: { type: string, enum: [demo, live, unavailable] }
+        isDemo: { type: boolean }
+      required: [commodityName, mandiName, unit, points, currentPrice, expectedPrice, expectedChangePercent, recommendation, reason, modelStatus, isDemo]
+    MandiComparison:
+      type: object
+      properties:
+        mandiId: { type: string }
+        mandiName: { type: string }
+        forecastPricePerQtl: { type: number }
+        distanceKm: { type: number }
+        transportCostPerQtl: { type: number }
+        netReturnPerQtl: { type: number }
+        isBestOption: { type: boolean }
+        isDemo: { type: boolean }
+      required: [mandiId, mandiName, forecastPricePerQtl, distanceKm, transportCostPerQtl, netReturnPerQtl, isBestOption, isDemo]
+    PriceAlert:
+      type: object
+      properties:
+        id: { type: string }
+        commodityId: { type: string }
+        commodityName: { type: string }
+        mandiId: { type: string }
+        mandiName: { type: string }
+        targetPrice: { type: number }
+        direction: { type: string, enum: [above, below] }
+        channel: { type: string, enum: [app] }
+        active: { type: boolean }
+        currentPrice: { type: ["number", "null"] }
+        targetReached: { type: boolean }
+        priceDataIsDemo: { type: boolean }
+      required: [id, commodityId, commodityName, mandiId, mandiName, targetPrice, direction, channel, active, currentPrice, targetReached, priceDataIsDemo]
+    PriceAlertInput:
+      type: object
+      properties:
+        commodityId: { type: string }
+        mandiId: { type: string }
+        targetPrice: { type: number, minimum: 1 }
+        direction: { type: string, enum: [above, below] }
+        channel: { type: string, enum: [app] }
+      required: [commodityId, mandiId, targetPrice, direction, channel]
+    PriceAlertUpdate:
+      type: object
+      properties:
+        targetPrice: { type: number, minimum: 1 }
+        direction: { type: string, enum: [above, below] }
+        channel: { type: string, enum: [app] }
+        active: { type: boolean }
+    Profile:
+      type: object
+      properties:
+        id: { type: string }
+        phone: { type: string }
+        name: { type: ["string", "null"] }
+        preferredCommodityId: { type: ["string", "null"] }
+        preferredMandiId: { type: ["string", "null"] }
+        preferredStateId: { type: ["string", "null"] }
+        role: { type: string, enum: [farmer, trader, admin] }
+      required: [id, phone, role, preferredCommodityId, preferredMandiId, preferredStateId]
+    ProfileUpdate:
+      type: object
+      properties:
+        name: { type: string, maxLength: 80 }
+        preferredCommodityId: { type: ["string", "null"] }
+        preferredMandiId: { type: ["string", "null"] }
+        role: { type: string, enum: [farmer, trader] }
+    OtpRequest:
+      type: object
+      properties:
+        phone: { type: string, pattern: "^\\+91[6-9][0-9]{9}$" }
+      required: [phone]
+    OtpRequestResult:
+      type: object
+      properties:
+        sent: { type: boolean }
+        developmentCode: { type: ["string", "null"] }
+        expiresInSeconds: { type: integer }
+      required: [sent, expiresInSeconds]
+    OtpVerify:
+      type: object
+      properties:
+        phone: { type: string, pattern: "^\\+91[6-9][0-9]{9}$" }
+        code: { type: string, minLength: 6, maxLength: 6 }
+      required: [phone, code]
+    AdminOverview:
+      type: object
+      properties:
+        totalUsers: { type: integer }
+        totalCommodities: { type: integer }
+        totalMandis: { type: integer }
+        todayRecords: { type: integer }
+        lastUpdated: { type: ["string", "null"], format: date-time }
+      required: [totalUsers, totalCommodities, totalMandis, todayRecords]
+    AdminCatalogEntry:
+      type: object
+      properties:
+        id: { type: string }
+        type: { type: string, enum: [commodity, state, mandi, variety] }
+        name: { type: string }
+        enabled: { type: boolean }
+        code: { type: ["string", "null"] }
+        stateId: { type: ["string", "null"] }
+        commodityId: { type: ["string", "null"] }
+        mandiId: { type: ["string", "null"] }
+      required: [id, type, name, enabled, code, stateId, commodityId, mandiId]
+    AdminCatalogInput:
+      type: object
+      properties:
+        type: { type: string, enum: [commodity, state, mandi, variety] }
+        name: { type: string, minLength: 1, maxLength: 80 }
+        code: { type: string, maxLength: 8 }
+        stateId: { type: string }
+        commodityId: { type: string }
+        mandiId: { type: string }
+      required: [type, name]
+    AdminCatalogUpdate:
+      type: object
+      properties:
+        name: { type: string, minLength: 1, maxLength: 80 }
+        code: { type: string, maxLength: 8 }
+        enabled: { type: boolean }
+    AdminUser:
+      type: object
+      properties:
+        id: { type: string }
+        phone: { type: string }
+        name: { type: ["string", "null"] }
+        role: { type: string, enum: [farmer, trader, admin] }
+        enabled: { type: boolean }
+        createdAt: { type: string, format: date-time }
+      required: [id, phone, role, enabled, createdAt]
+    AdminMarketRecord:
+      type: object
+      properties:
+        id: { type: string }
+        commodityId: { type: string }
+        commodityName: { type: string }
+        mandiId: { type: string }
+        mandiName: { type: string }
+        date: { type: string, format: date }
+        minimumPrice: { type: number }
+        maximumPrice: { type: number }
+        modalPrice: { type: number }
+        arrivals: { type: number }
+        arrivalUnit: { type: string }
+        source: { type: string }
+        isDemo: { type: boolean }
+      required: [id, commodityId, commodityName, mandiId, mandiName, date, minimumPrice, maximumPrice, modalPrice, arrivals, arrivalUnit, source, isDemo]
+    AdminMarketRecordInput:
+      type: object
+      properties:
+        commodityId: { type: string }
+        mandiId: { type: string }
+        date: { type: string, format: date }
+        minimumPrice: { type: number, minimum: 0 }
+        maximumPrice: { type: number, minimum: 0 }
+        modalPrice: { type: number, minimum: 0 }
+        arrivals: { type: number, minimum: 0 }
+        arrivalUnit: { type: string }
+        source: { type: string, minLength: 1 }
+      required: [commodityId, mandiId, date, minimumPrice, maximumPrice, modalPrice, arrivals, arrivalUnit, source]
+    AdminMarketRecordUpdate:
+      type: object
+      properties:
+        minimumPrice: { type: number, minimum: 0 }
+        maximumPrice: { type: number, minimum: 0 }
+        modalPrice: { type: number, minimum: 0 }
+        arrivals: { type: number, minimum: 0 }
+        source: { type: string, minLength: 1 }
+    MarketImport:
+      type: object
+      properties:
+        records:
+          type: array
+          maxItems: 5000
+          items: { $ref: "#/components/schemas/AdminMarketRecordInput" }
+      required: [records]
+    ImportResult:
+      type: object
+      properties:
+        imported: { type: integer }
+        rejected: { type: integer }
+        errors:
+          type: array
+          items: { type: string }
+      required: [imported, rejected, errors]
+    DataHealth:
+      type: object
+      properties:
+        lastSuccessfulUpdate: { type: ["string", "null"], format: date-time }
+        missingDataCount: { type: integer }
+        failedImports: { type: integer }
+        recordCount: { type: integer }
+        freshness: { type: string, enum: [current, outdated, demo] }
+        marketProviderConfigured: { type: boolean }
+        forecastProviderConfigured: { type: boolean }
+        otpProviderConfigured: { type: boolean }
+      required: [missingDataCount, failedImports, recordCount, freshness, marketProviderConfigured, forecastProviderConfigured, otpProviderConfigured]
 

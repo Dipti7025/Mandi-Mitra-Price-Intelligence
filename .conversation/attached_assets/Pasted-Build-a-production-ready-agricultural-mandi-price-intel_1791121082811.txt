@@ -1,0 +1,989 @@
+Build a **production-ready agricultural mandi price intelligence web application** that can later be packaged as an Android APK.
+
+The application is intended for **real farmers, traders, and agricultural users**, so the UI must be extremely simple, trustworthy, mobile-first, and understandable to a person with basic smartphone knowledge.
+
+Do NOT make it look like an AI demo, developer dashboard, or college prototype. It should look like a real-world Indian agricultural market application.
+
+## 1. Core purpose
+
+The application should help a farmer/user answer three simple questions:
+
+1. **What is today's mandi price?**
+2. **What is the expected price over the next 7 days?**
+3. **Should I HOLD my commodity or RELEASE/SELL it now?**
+
+The application should present complex market data in very simple language.
+
+---
+
+# 2. USER TYPES
+
+Implement three access levels:
+
+### A. Guest User
+
+A guest user should be able to:
+
+* Open the application without creating an account.
+* Select Commodity.
+* Select State.
+* Select Mandi.
+* Select Variety if available.
+* View today's market information.
+* View the 7-day price forecast.
+* View the Hold / Release recommendation.
+
+Guest users should have limited functionality but should NOT be forced to register just to see basic market information.
+
+Provide a clear option:
+
+**Login / Register**
+
+---
+
+### B. Authenticated User
+
+Users should authenticate using their **phone number**.
+
+Authentication flow:
+
+1. Enter mobile number.
+2. Send OTP.
+3. Verify OTP.
+4. Create/login to account.
+5. Store basic user profile.
+
+Do not ask for unnecessary personal information.
+
+After login, allow users to:
+
+* Save preferred commodity.
+* Save preferred mandi.
+* View market information.
+* View forecasts.
+* View Hold / Release recommendations.
+* See their recently selected markets.
+
+Design authentication for Indian users and use:
+
+**+91**
+
+---
+
+### C. Admin
+
+Create a separate Admin dashboard.
+
+Admin should be able to:
+
+* Login securely.
+* Manage commodities.
+* Manage states.
+* Manage mandis.
+* Manage varieties.
+* Manage market prices.
+* Manage arrivals.
+* Manage historical market data.
+* Manage forecast data/model status.
+* View registered users.
+* Manage/update market datasets.
+* See data freshness / last updated time.
+* Enable/disable commodities or mandis.
+
+Admin dashboard should be separate from the normal user interface.
+
+---
+
+# 3. MAIN USER FLOW
+
+The primary screen should start with a simple market selection section.
+
+Title:
+
+**Check Today's Mandi Price**
+
+Show:
+
+### Commodity
+
+Dropdown/searchable dropdown.
+
+Example:
+
+**Onion**
+
+### State
+
+Dropdown/searchable dropdown.
+
+Example:
+
+**Maharashtra**
+
+### Mandi
+
+Dropdown/searchable dropdown.
+
+Example:
+
+**Lasalgaon**
+
+### Variety
+
+Dropdown/searchable dropdown.
+
+Example:
+
+Only show varieties that actually exist for the selected commodity/mandi in the dataset.
+
+IMPORTANT:
+
+Do NOT show fake varieties.
+
+If the dataset does not contain a variety, either:
+
+* Hide the variety field, OR
+* Show "Variety not available"
+
+The selections should be dependent:
+
+Commodity → State → Mandi → Variety
+
+Do not make the user scroll through huge unrelated dropdown lists.
+
+Use searchable dropdowns when the list is large.
+
+---
+
+# 4. TODAY'S MARKET SECTION
+
+After the user selects the market, display a clear card:
+
+## Today's Market
+
+**Onion**
+
+**Lasalgaon Mandi, Maharashtra**
+
+Show the following key information:
+
+### Modal Price
+
+₹2,150 / quintal
+
+Explain it in simple language:
+
+**Typical market price today**
+
+### Minimum – Maximum
+
+₹1,850 – ₹2,450 / quintal
+
+Label it clearly:
+
+**Today's lowest – highest price**
+
+### Today's Arrivals
+
+1,420 tonnes
+
+Explain:
+
+**Quantity of onion that arrived in the mandi today**
+
+### Change vs Yesterday
+
++3.2%
+
+Display simple wording:
+
+**Price is 3.2% higher than yesterday**
+
+Do not assume the user understands terms like "modal price", "arrivals", etc.
+
+The UI should prioritize understandable explanations.
+
+---
+
+# 5. IMPORTANT: LANGUAGE FOR LAY USERS
+
+Do NOT overload the interface with technical agricultural terminology.
+
+For example:
+
+Instead of only:
+
+"Modal Price"
+
+Display:
+
+**Typical Market Price**
+
+₹2,150 / quintal
+
+Then optionally show:
+
+"Modal price"
+
+as smaller secondary text.
+
+Similarly:
+
+Instead of only:
+
+"Arrivals"
+
+Display:
+
+**Today's Market Arrival**
+
+1,420 tonnes
+
+Small explanation:
+
+"Total quantity brought to the mandi today."
+
+Use simple Indian English.
+
+The application should be understandable to a farmer who is not technically educated.
+
+---
+
+# 6. PRICE TREND / 7-DAY FORECAST
+
+After today's market information, create a section:
+
+## Market Outlook
+
+### Onion Price Forecast — Next 7 Days
+
+Show an easy-to-understand line chart.
+
+The chart should show:
+
+* Today's actual price.
+* Forecast price for Day 1.
+* Day 2.
+* Day 3.
+* Day 4.
+* Day 5.
+* Day 6.
+* Day 7.
+
+Example concept:
+
+Today → ₹2,000
+
+Day 1 → ₹2,030
+
+Day 2 → ₹2,080
+
+Day 3 → ₹2,120
+
+Day 4 → ₹2,160
+
+Day 5 → ₹2,190
+
+Day 6 → ₹2,230
+
+Day 7 → ₹2,250
+
+IMPORTANT:
+
+These numbers are ONLY example values for UI development.
+
+Do NOT hard-code these values into the final production system.
+
+The application must use the actual dataset/model/API once connected.
+
+Clearly differentiate:
+
+**Actual Price**
+
+and
+
+**Forecast Price**
+
+Do not make the graph visually confusing.
+
+---
+
+# 7. FORECAST EXPLANATION
+
+Under the graph, show a very simple summary.
+
+Example:
+
+### Expected Price After 7 Days
+
+₹2,250 / quintal
+
+### Expected Change
+
++12.5%
+
+Then show:
+
+**What does this mean?**
+
+"Prices are expected to increase over the next 7 days."
+
+Do not expose complex ML terminology to normal users.
+
+If the prediction confidence is available, show it simply:
+
+**Forecast confidence: High / Medium / Low**
+
+Do not display fake confidence values.
+
+If confidence cannot be calculated from the model, hide this field.
+
+---
+
+# 8. HOLD OR RELEASE FEATURE
+
+This is one of the most important features.
+
+Create a prominent section:
+
+# Should You Hold or Sell?
+
+The application should analyze today's price against the predicted price over the next 7 days.
+
+Possible recommendation states:
+
+### HOLD
+
+Example:
+
+**HOLD**
+
+"Prices are expected to increase over the next 7 days."
+
+"Expected price: ₹2,250/qtl"
+
+"Current price: ₹2,000/qtl"
+
+"Potential increase: ₹250/qtl"
+
+---
+
+### RELEASE / SELL
+
+Example:
+
+**RELEASE / SELL**
+
+"Prices are not expected to increase significantly over the next 7 days."
+
+"Current price: ₹2,000/qtl"
+
+"Expected price: ₹1,920/qtl"
+
+---
+
+### WAIT / UNCERTAIN
+
+If the forecast is too uncertain:
+
+**WAIT / CHECK AGAIN**
+
+"Price movement is uncertain. We don't have enough confidence to recommend holding or selling."
+
+This is important because the application should NOT force a Hold/Sell decision when the prediction is unreliable.
+
+---
+
+# 9. IMPORTANT DISCLAIMER
+
+Because this application gives a market recommendation, display a small but clear disclaimer:
+
+**Market prices are predictions and can change due to weather, demand, supply, transport, government policies and other market conditions. Use this information as guidance, not as a guaranteed return.**
+
+Do not present the prediction as guaranteed profit.
+
+---
+
+# 10. HOMEPAGE DESIGN
+
+Create a clean mobile-first homepage.
+
+Top:
+
+**[App Logo]**
+
+**Mandi Price**
+
+Navigation:
+
+* Home
+* Market
+* Forecast
+* Login/Profile
+
+Main hero:
+
+**Know Today's Price. Plan Tomorrow's Sale.**
+
+Subtext:
+
+"Check mandi prices and understand the expected market trend for the next 7 days."
+
+Then:
+
+**Select Your Market**
+
+Commodity
+↓
+State
+↓
+Mandi
+↓
+Variety
+
+Button:
+
+**Check Market Price**
+
+---
+
+# 11. DASHBOARD LAYOUT
+
+After selecting the market:
+
+---
+
+Today's Market
+
+Onion
+Lasalgaon, Maharashtra
+
+₹2,150/qtl
+
+Typical Market Price
+
+₹1,850 – ₹2,450
+
+Lowest – Highest
+
+1,420 tonnes
+
+Today's Arrival
+
++3.2%
+
+vs Yesterday
+
+---
+
+Market Outlook
+
+Onion Price — Next 7 Days
+
+[LINE GRAPH]
+
+Expected after 7 days:
+
+₹2,250/qtl
+
+---
+
+Should You Hold or Sell?
+
+🟢 HOLD
+
+"Prices are expected to rise."
+
+---
+
+Last updated:
+[actual timestamp]
+
+---
+
+Keep the screen uncluttered.
+
+---
+
+# 12. DATA ARCHITECTURE
+
+Create a proper backend instead of storing everything directly inside frontend code.
+
+Recommended structure:
+
+Frontend:
+
+* React
+* TypeScript
+* Tailwind CSS
+
+Backend:
+
+* Node.js
+* Express.js
+
+Database:
+
+* PostgreSQL
+
+Create proper tables/entities for:
+
+users
+commodities
+states
+mandis
+varieties
+market_prices
+market_arrivals
+historical_prices
+forecasts
+recommendations
+admin_users
+
+Use relationships between these entities.
+
+Example:
+
+Commodity
+→ State
+→ Mandi
+→ Variety
+→ Daily Market Price
+
+---
+
+# 13. MARKET DATA
+
+The application should be designed so that real mandi data can later be imported through:
+
+* CSV upload
+* API
+* Admin dashboard
+* Scheduled data updates
+
+Do not fabricate real-world market data.
+
+For development/demo purposes, clearly mark seed data as:
+
+**Demo Data**
+
+Once real data is connected, automatically remove the demo indication.
+
+Every market record should ideally contain:
+
+* Commodity
+* State
+* Mandi
+* Variety
+* Date
+* Minimum Price
+* Maximum Price
+* Modal Price
+* Arrival Quantity
+* Unit
+* Data source
+* Last updated timestamp
+
+---
+
+# 14. FORECASTING ARCHITECTURE
+
+Build the system so forecasting can be integrated cleanly.
+
+Create a forecasting service/module that receives:
+
+Commodity
+State
+Mandi
+Variety
+Historical price data
+
+and returns:
+
+* Today's price
+* Day 1 forecast
+* Day 2 forecast
+* Day 3 forecast
+* Day 4 forecast
+* Day 5 forecast
+* Day 6 forecast
+* Day 7 forecast
+* Forecast confidence if supported
+
+Do not pretend that a forecast is ML-generated if no model exists.
+
+For initial development, create a clearly separated mock forecasting service so a real ML model/API can replace it later.
+
+---
+
+# 15. RECOMMENDATION ENGINE
+
+Create a separate recommendation service.
+
+Inputs:
+
+* Current modal price
+* 7-day predicted prices
+* Historical trend
+* Forecast confidence
+* Optional market volatility
+
+Output:
+
+* HOLD
+* RELEASE
+* WAIT / UNCERTAIN
+
+Also return a human-readable explanation.
+
+Example:
+
+{
+"recommendation": "HOLD",
+"currentPrice": 2000,
+"forecastPrice": 2250,
+"expectedChange": 12.5,
+"reason": "Prices are expected to increase over the next 7 days."
+}
+
+IMPORTANT:
+
+Do not make recommendations based only on a single arbitrary percentage.
+
+Keep the recommendation logic configurable from the admin/backend so it can later be improved using real agricultural market data and domain expertise.
+
+---
+
+# 16. ADMIN DASHBOARD
+
+Admin dashboard should contain:
+
+### Overview
+
+* Total users
+* Total commodities
+* Total mandis
+* Today's market records
+* Last data update
+
+### Market Data
+
+Allow admin to:
+
+* Add
+* Edit
+* Delete
+* Import CSV
+* Search
+* Filter
+
+### Commodity Management
+
+Add/edit commodities.
+
+### Mandi Management
+
+Add/edit mandis and associate them with states.
+
+### Variety Management
+
+Associate varieties with commodities and mandis.
+
+### Forecast Management
+
+Show forecast generation status.
+
+### Data Health
+
+Display:
+
+* Last successful update
+* Missing data
+* Failed imports
+* Number of records
+* Data freshness
+
+---
+
+# 17. SECURITY
+
+Implement:
+
+* Secure authentication
+* OTP verification architecture
+* Password hashing where passwords are used
+* JWT/session-based authentication
+* Role-based authorization
+* Admin-only routes
+* Input validation
+* API validation
+* Rate limiting
+* Secure environment variables
+* No API keys in frontend
+* Proper error handling
+
+Never expose admin APIs to normal users.
+
+---
+
+# 18. MOBILE-FIRST UI
+
+The application will primarily be used on phones.
+
+Design for:
+
+* Android phones
+* Small screens
+* Touch-friendly buttons
+* Large readable text
+* High contrast
+* Simple cards
+* Minimal typing
+
+Avoid:
+
+* Tiny text
+* Dense tables on mobile
+* Complex dashboards for normal users
+* Excessive animations
+* Excessive gradients
+* Overuse of icons
+* AI-looking neon interfaces
+
+The design should feel like a trustworthy Indian government/agriculture utility rather than a futuristic AI application.
+
+---
+
+# 19. VISUAL STYLE
+
+Use:
+
+* Clean white/light background
+* Agricultural-inspired subtle green accents
+* Simple cards
+* Clear typography
+* Large numbers
+* Rounded but professional UI
+* Simple charts
+* Green for positive price movement
+* Red for negative movement
+* Neutral color for uncertainty
+
+Do not make the interface overly colorful.
+
+The primary goal is:
+
+**Clarity > decoration**
+
+---
+
+# 20. ERROR / EMPTY STATES
+
+Handle cases such as:
+
+No data available:
+
+**Market data is currently unavailable for this selection. Please try another mandi.**
+
+Forecast unavailable:
+
+**7-day forecast is currently unavailable. Please check again later.**
+
+No variety:
+
+**Variety information is not available for this market.**
+
+Network error:
+
+**Unable to load market data. Please check your internet connection and try again.**
+
+---
+
+# 21. DATA FRESHNESS
+
+Every market result should show:
+
+**Last updated: [date/time]**
+
+If the data is old, show an appropriate warning:
+
+**Market data may be outdated.**
+
+Do not make old data appear to be today's live data.
+
+---
+
+# 22. RESPONSIVE WEB APP + APK READY
+
+Build the application as a responsive web application that can later be packaged into an Android APK.
+
+Structure the project cleanly so it can eventually be wrapped using:
+
+* Capacitor
+
+or another appropriate Android packaging solution.
+
+Do not create a desktop-only application.
+
+---
+
+# 23. DEVELOPMENT REQUIREMENTS
+
+Before writing large amounts of code:
+
+1. Create the project architecture.
+2. Create database schema.
+3. Create API structure.
+4. Create frontend pages.
+5. Implement authentication architecture.
+6. Implement market selection.
+7. Implement market dashboard.
+8. Implement forecast graph.
+9. Implement Hold/Release recommendation.
+10. Implement admin dashboard.
+11. Add seed/demo data.
+12. Test all user flows.
+13. Fix responsive/mobile issues.
+14. Prepare production deployment configuration.
+
+---
+
+# 24. IMPORTANT: DO NOT ASK ME TO BUILD EACH SCREEN MANUALLY
+
+You are acting as the development agent.
+
+Create the complete working application.
+
+If a real external API or OTP provider is not configured yet:
+
+* Build the integration interface.
+* Use clearly marked development/mock mode.
+* Put credentials/API keys in environment variables.
+* Provide setup instructions.
+* Do NOT hard-code fake production credentials.
+
+---
+
+# 25. FINAL USER EXPERIENCE
+
+The final experience should be as simple as:
+
+USER OPENS APP
+
+↓
+
+Select Commodity
+
+**Onion**
+
+↓
+
+Select State
+
+**Maharashtra**
+
+↓
+
+Select Mandi
+
+**Lasalgaon**
+
+↓
+
+Select Variety
+
+**[available variety]**
+
+↓
+
+Tap:
+
+**Check Today's Price**
+
+↓
+
+See:
+
+**Today's Market**
+
+Typical Price
+₹2,150/qtl
+
+Lowest – Highest
+₹1,850 – ₹2,450
+
+Today's Arrival
+1,420 tonnes
+
+Change
++3.2%
+
+↓
+
+See:
+
+**7-Day Market Outlook**
+
+[Simple line graph]
+
+↓
+
+See:
+
+**Expected Price After 7 Days**
+
+₹2,250/qtl
+
+↓
+
+See:
+
+**Should You Hold or Sell?**
+
+🟢 HOLD
+
+"Prices are expected to increase over the next 7 days."
+
+↓
+
+User understands the market situation without needing to understand technical agricultural or ML terminology.
+
+---
+
+# 26. QUALITY REQUIREMENT
+
+This is intended for **real-world usage**, not just a classroom prototype.
+
+Therefore:
+
+* Write clean maintainable code.
+* Use reusable components.
+* Use proper API architecture.
+* Validate all inputs.
+* Handle loading states.
+* Handle errors.
+* Handle empty data.
+* Make the application mobile responsive.
+* Do not hard-code market data into UI components.
+* Do not use fake data as real data.
+* Separate demo data from production data.
+* Keep forecasting logic modular.
+* Keep recommendation logic modular.
+* Keep admin and user permissions separate.
+* Add comments only where they are useful.
+* Do not leave major TODO placeholders for core functionality.
+
+At the end, provide:
+
+1. Project structure.
+2. How to run locally.
+3. Required environment variables.
+4. Database setup instructions.
+5. Demo login credentials if applicable.
+6. Admin login instructions.
+7. How to replace demo market data with real data.
+8. How to connect the real forecasting model/API.
+9. How to deploy the application.
+10. How to package it as an Android APK later.
+
+Start by creating the architecture and then implement the application end-to-end.
